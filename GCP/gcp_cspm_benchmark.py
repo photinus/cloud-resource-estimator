@@ -99,7 +99,7 @@ totals = {'project_id': 'totals',
           'vms_running': 0, 'vms_terminated': 0}
 
 
-def get_gcp_logging_details(project): # pylint: disable=redefined-outer-name
+def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
     rows = []
