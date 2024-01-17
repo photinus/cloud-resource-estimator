@@ -139,7 +139,7 @@ for project in gcp.projects():
 
     logging_details = get_gcp_logging_details(project)
     if logging_details:
-        logging_rows.append()
+        logging_rows.append(logging_details)
 
 data.append(totals)
 
