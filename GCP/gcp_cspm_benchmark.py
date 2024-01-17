@@ -155,8 +155,6 @@ headers = ['project_id', 'sink_name', 'sink_destination', 'sink_filter']
 with open('gcp-logging-config.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
     csv_writer.writeheader()
-    for log_row in logging_rows:
-        if log_row:
-            csv_writer.writerow(log_row)
+    csv_writer.writerows(logging_rows)
 
 log.info("CSV Logging summary has been exported to ./gcp-logging-config.csv file")
