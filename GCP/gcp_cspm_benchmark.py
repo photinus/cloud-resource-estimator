@@ -113,9 +113,9 @@ def get_gcp_logging_details(project):
 
     # Handle the response
     for response in page_result:
-	    row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
+        row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
         rows.append(row)
-
+    
     return rows
 
 gcp = GCP()
