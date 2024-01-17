@@ -98,6 +98,7 @@ totals = {'project_id': 'totals',
           'kubenodes_running': 0, 'kubenodes_terminated': 0,
           'vms_running': 0, 'vms_terminated': 0}
 
+
 def get_gcp_logging_details(project):
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
