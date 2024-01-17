@@ -102,7 +102,7 @@ totals = {'project_id': 'totals',
 def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
-        return None
+        return []
 
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
@@ -139,7 +139,7 @@ for project in gcp.projects():
 
     logging_details = get_gcp_logging_details(project)
     if logging_details:
-        logging_rows.append(logging_details)
+        logging_rows += logging_details
 
 data.append(totals)
 
