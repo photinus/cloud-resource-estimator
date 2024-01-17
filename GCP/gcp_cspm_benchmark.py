@@ -117,8 +117,8 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     # Handle the response
     for response in page_result:
         sink_row = {'project_id': project.project_id,
-                    'name': response.name, 'destination': response.destination,
-                    'filter': response.filter}
+                    'sink_name': response.name, 'sink_destination': response.destination,
+                    'sink_filter': response.filter}
         rows.append(sink_row)
 
     return rows
