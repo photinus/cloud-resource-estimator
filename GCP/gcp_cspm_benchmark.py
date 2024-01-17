@@ -102,7 +102,11 @@ totals = {'project_id': 'totals',
 def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
-        return {}
+        return None
+        
+    result = {'project_id': project.project_id,
+              'name': '', 'destination': '',
+              'filter': ''}
 
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
@@ -116,7 +120,9 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
 
     # Handle the response
     for response in page_result:
-        sink_row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
+        sink_row = {'project_id': project.project_id,
+                    'name': response.name, 'destination': response.destination,
+                    'filter': response.filter}
         rows.append(sink_row)
 
     return rows
@@ -124,6 +130,7 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
 
 gcp = GCP()
 
+logging_rows = []
 for project in gcp.projects():
     row = process_gcp_project(project)
     if row:
@@ -133,7 +140,10 @@ for project in gcp.projects():
                 continue
 
             totals[k] += row[k]
-    logging_rows = get_gcp_logging_details(project)
+
+    logging_details = get_gcp_logging_details(project)
+    if logging_details:
+        logging_rows.append()
 
 data.append(totals)
 
@@ -150,6 +160,7 @@ with open('gcp-logging-config.csv', 'w', newline='', encoding='utf-8') as csv_fi
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
     csv_writer.writeheader()
     for log_row in logging_rows:
-        csv_writer.writerow(log_row)
+        if low_row:
+            csv_writer.writerow(log_row)
 
 log.info("CSV Logging summary has been exported to ./gcp-logging-config.csv file")
