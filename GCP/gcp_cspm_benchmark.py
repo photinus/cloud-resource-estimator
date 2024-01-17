@@ -103,10 +103,6 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
         return None
-        
-    result = {'project_id': project.project_id,
-              'name': '', 'destination': '',
-              'filter': ''}
 
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
@@ -160,7 +156,7 @@ with open('gcp-logging-config.csv', 'w', newline='', encoding='utf-8') as csv_fi
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
     csv_writer.writeheader()
     for log_row in logging_rows:
-        if low_row:
+        if log_row:
             csv_writer.writerow(log_row)
 
 log.info("CSV Logging summary has been exported to ./gcp-logging-config.csv file")
