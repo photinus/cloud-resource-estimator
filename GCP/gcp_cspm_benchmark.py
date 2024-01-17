@@ -99,7 +99,7 @@ totals = {'project_id': 'totals',
           'vms_running': 0, 'vms_terminated': 0}
 
 
-def get_gcp_logging_details(project):
+def get_gcp_logging_details(project): # pylint: disable=redefined-outer-name
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
     rows = []
@@ -112,8 +112,8 @@ def get_gcp_logging_details(project):
 
     # Handle the response
     for response in page_result:
-        row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
-        rows.append(row)
+        sink_row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
+        rows.append(sink_row)
 
     return rows
 
