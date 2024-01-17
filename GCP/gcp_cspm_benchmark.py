@@ -102,11 +102,9 @@ def get_gcp_logging_details(project):
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
     rows = []
-    
+
     # Initialize request argument(s)
-    request = logging_v2.types.ListSinksRequest(
-	parent=parent,
-    )
+    request = logging_v2.types.ListSinksRequest(parent=parent)
 
     # Make the request
     page_result = gcp_logging_client.list_sinks(request=request)
@@ -115,8 +113,9 @@ def get_gcp_logging_details(project):
     for response in page_result:
         row = project.project_id + "," + response.name + "," + response.destination + "," + response.filter
         rows.append(row)
-    
+
     return rows
+
 
 gcp = GCP()
 
