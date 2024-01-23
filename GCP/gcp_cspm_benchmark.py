@@ -135,7 +135,7 @@ def get_gcp_service_account_count(project):  # pylint: disable=redefined-outer-n
 gcp = GCP()
 
 logging_rows = []
-service_account_rows = []
+service_account_rows = {}
 for project in gcp.projects():  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
