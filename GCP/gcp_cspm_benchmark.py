@@ -116,7 +116,7 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     return rows
 
 
-def get_gcp_service_account_count(project):
+def get_gcp_service_account_count(project):  # pylint: disable=redefined-outer-name
 
     iam_client = discovery.build("iam", "v1")
 
@@ -136,7 +136,7 @@ gcp = GCP()
 
 logging_rows = []
 service_account_rows = []
-for project in gcp.projects():
+for project in gcp.projects():  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
         continue
