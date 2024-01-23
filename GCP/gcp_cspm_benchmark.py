@@ -179,6 +179,6 @@ with open('gcp-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
     csv_writer.writeheader()
     for pro_id in service_account_rows:  # pylint: disable=consider-using-dict-items
-        csv_writer.writerow([pro_id, 'service_account_total', service_account_rows[pro_id]])
+        csv_writer.writerow((pro_id, 'service_account_total', service_account_rows[pro_id]))
 
 log.info("CSV Logging summary has been exported to ./gcp-iam-details.csv file")
