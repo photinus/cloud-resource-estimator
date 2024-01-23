@@ -120,8 +120,8 @@ def get_gcp_service_account_count(project):
 
     iam_client = discovery.build("iam", "v1")
 
-    service_accounts = (
-        iam_client.projects()
+    service_accounts = ( 
+        iam_client.projects() # pylint: disable=no-member
         .serviceAccounts()
         .list(name="projects/" + project.project_id)
         .execute()
@@ -179,6 +179,6 @@ with open('gcp-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
     csv_writer.writeheader()
     for pid in service_account_rows:
-        csv_writer.writerow(pid, 'service_account_total', service_account_rows[pid])
+        csv_writer.writerow([pid, 'service_account_total', service_account_rows[pid]])
 
 log.info("CSV Logging summary has been exported to ./gcp-iam-details.csv file")
