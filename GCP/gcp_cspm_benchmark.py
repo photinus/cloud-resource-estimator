@@ -63,10 +63,6 @@ class GCP:
 
 
 def process_gcp_project(project):  # pylint: disable=redefined-outer-name
-    if project.state == Project.State.DELETE_REQUESTED:
-        log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
-        return {}
-
     result = {'project_id': project.project_id,
               'kubenodes_running': 0, 'kubenodes_terminated': 0,
               'vms_running': 0, 'vms_terminated': 0}
@@ -100,10 +96,6 @@ totals = {'project_id': 'totals',
 
 
 def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
-    if project.state == Project.State.DELETE_REQUESTED:
-        log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
-        return []
-
     gcp_logging_client = logging_v2.services.config_service_v2.ConfigServiceV2Client()
     parent = "projects/" + project.project_id
     rows = []
@@ -124,10 +116,31 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
     return rows
 
 
+def get_gcp_service_account_count(project):  # pylint: disable=redefined-outer-name
+
+    iam_client = discovery.build("iam", "v1")
+
+    service_accounts = (
+        iam_client.projects()  # pylint: disable=no-member
+        .serviceAccounts()
+        .list(name="projects/" + project.project_id)
+        .execute()
+    )
+
+    service_account_count = len(service_accounts['accounts'])
+
+    return service_account_count
+
+
 gcp = GCP()
 
 logging_rows = []
-for project in gcp.projects():
+service_account_rows = []
+for project in gcp.projects():  # pylint: disable=redefined-outer-name
+    if project.state == Project.State.DELETE_REQUESTED:
+        log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
+        continue
+
     row = process_gcp_project(project)
     if row:
         data.append(row)
@@ -140,6 +153,8 @@ for project in gcp.projects():
     logging_details = get_gcp_logging_details(project)
     if logging_details:
         logging_rows += logging_details
+
+    service_account_rows[project.project_id] = get_gcp_service_account_count(project)
 
 data.append(totals)
 
@@ -158,3 +173,12 @@ with open('gcp-logging-config.csv', 'w', newline='', encoding='utf-8') as csv_fi
     csv_writer.writerows(logging_rows)
 
 log.info("CSV Logging summary has been exported to ./gcp-logging-config.csv file")
+
+headers = ['project_id', 'type', 'value']
+with open('gcp-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
+    csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
+    csv_writer.writeheader()
+    for pid in service_account_rows:
+        csv_writer.writerow([pid, 'service_account_total', service_account_rows[pid]])
+
+log.info("CSV Logging summary has been exported to ./gcp-iam-details.csv file")
