@@ -118,13 +118,13 @@ def get_gcp_logging_details(project):  # pylint: disable=redefined-outer-name
 
 def get_gcp_service_account_count(project):
 
-    iam_client = googleapiclient.discovery.build("iam", "v1")
+    iam_client = discovery.build("iam", "v1")
 
     service_accounts = (
-    	iam_client.projects()
-    	.serviceAccounts()
-    	.list(name="projects/" + project.project_id)
-    	.execute()
+        iam_client.projects()
+        .serviceAccounts()
+        .list(name="projects/" + project.project_id)
+        .execute()
     )
 
     service_account_count = len(service_accounts['accounts'])
