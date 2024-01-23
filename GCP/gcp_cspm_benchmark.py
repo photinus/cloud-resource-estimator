@@ -121,7 +121,7 @@ def get_gcp_service_account_count(project):
     iam_client = discovery.build("iam", "v1")
 
     service_accounts = ( 
-        iam_client.projects() # pylint: disable=no-member
+        iam_client.projects()  # pylint: disable=no-member
         .serviceAccounts()
         .list(name="projects/" + project.project_id)
         .execute()
