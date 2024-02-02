@@ -177,7 +177,6 @@ class AWSHandle:
         return len(roles)
 
 
-
 args = parse_args()
 
 for aws in AWSOrgAccess().accounts():
