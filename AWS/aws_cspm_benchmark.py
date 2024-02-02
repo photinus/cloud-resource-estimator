@@ -142,6 +142,40 @@ class AWSHandle:
 
         return self.acc_id
 
+    @property
+    def iam(self):
+        return self.aws_session.client("iam")
+
+    def users_conut(self):
+
+        client = self.iam
+
+        response = client.list_users(MaxResults=1000)
+        users = response['Users']
+        next_token = response['NextToken'] if 'NextToken' in response else None
+
+        while next_token:
+            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
+            users += response['Users']
+            next_token = response['NextToken'] if 'NextToken' in response else None
+
+        return len(users)
+
+    def roles_conut(self):
+
+        client = self.iam
+
+        response = client.list_roles(MaxResults=1000)
+        roles = response['Users']
+        next_token = response['NextToken'] if 'NextToken' in response else None
+
+        while next_token:
+            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
+            roles += response['Users']
+            next_token = response['NextToken'] if 'NextToken' in response else None
+
+        return len(roles)
+
 
 args = parse_args()
 
@@ -172,6 +206,11 @@ for aws in AWSOrgAccess().accounts():
     # Add in our grand totals to the display table
 data.append(totals)
 
+# Get IAM details
+iam_counts = {}
+for aws in AWSOrgAccess().accounts():
+    iam_counts[aws.account_id] = [aws.users_conut(), aws.roles_conut()]
+
 # Output our results
 print(tabulate(data, headers=headers, tablefmt="grid"))
 
@@ -181,6 +220,14 @@ with open('aws-benchmark.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer.writerows(data)
 
 print("\nCSV file stored in: ./aws-benchmark.csv\n\n")
+
+headers = ['account_id', 'users', 'roles']
+with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(headers)
+    for acc in iam_counts:  # pylint: disable=consider-using-dict-items
+        ucount, rcount = iam_counts[acc]
+        csv_writer.writerow([acc, ucount, rcount])
 
 
 #     .wwwwwwww.
