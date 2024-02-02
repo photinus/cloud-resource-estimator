@@ -150,7 +150,7 @@ class AWSHandle:
 
         client = self.iam
 
-        response = client.list_users(MaxResults=1000)
+        response = client.list_users(MaxItems=1000)
         users = response['Users']
         next_token = response['NextToken'] if 'NextToken' in response else None
 
@@ -165,7 +165,7 @@ class AWSHandle:
 
         client = self.iam
 
-        response = client.list_roles(MaxResults=1000)
+        response = client.list_roles(MaxItems=1000)
         roles = response['Users']
         next_token = response['NextToken'] if 'NextToken' in response else None
 
