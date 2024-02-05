@@ -38,6 +38,10 @@ def parse_args():
         "-r", "--role_name",
         default="OrganizationAccountAccessRole",
         help="Specify a custom role name to assume into.")
+    parser.add_argument(
+        "-b", "--bucket_name",
+        default=None,
+        help="S3 bucket to upload results to")
     return parser.parse_args()
 
 
@@ -231,6 +235,10 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 
 print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
+if args.bucket_name:
+    upload_client = Upload(args.bucket_name)
+    upload_client.upload()
+    print("\nCSV files uploaded to:" + args.bucket_name + "\n\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
