@@ -61,6 +61,8 @@ is_valid_cloud() {
 call_benchmark_script() {
     local cloud="$1"
     local file="$2"
+    local 
+    local 
     local args=()
 
     case "$cloud" in
@@ -100,7 +102,11 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    call_benchmark_script "$CLOUD" "${file}" -b "$BLOB_CS" -c "$CONTAINER"
+    if [ "$BLOB_CS" != "_" ]; then
+        call_benchmark_script "$CLOUD" "${file}" -b "$BLOB_CS" -c "$CONTAINER"
+    else
+        call_benchmark_script "$CLOUD" "${file}"
+    fi
 }
 
 check_python3
@@ -113,47 +119,26 @@ source ./bin/activate
 # MAIN ROUTINE
 found_provider=false
 
-# If arguments are provided, audit the specified providers
-
-result=$(is_valid_cloud "$1")
-# shellcheck disable=SC2181
-if [ $? -eq 0 ]; then
-    if [ $# -gt 1 ]; then
-        cs_string=$2
-        container=$3
-    else
-        cs_string=""
-        container=""
-    fi
-    audit "$result" "$cs_string" "$container"
-    found_provider=true
+if [ $# -gt 1 ]; then
+    cs_string=$1
+    container=$2
 else
-    echo "Invalid cloud provider specified: $1"
-    # Exit only if found_provider is false. This means that if the user
-    # specifies a valid cloud provider, but also an invalid one, we will
-    # still run the audit for the valid provider.
-    if [ "$found_provider" = false ]; then
-        usage
-        popd >/dev/null && exit 1
-    fi
+    cs_string="_"
+    container="_"
 fi
 
-# If no arguments provided, auto-detect the available cloud providers
-if [ $# -eq 0 ]; then
-    echo "Determining cloud provider..."
-    if type aws >/dev/null 2>&1; then
-        audit "AWS"
-        found_provider=true
-    fi
-    if type az >/dev/null 2>&1; then
-        audit "Azure"
-        found_provider=true
-    fi
-
-    if type gcloud >/dev/null 2>&1; then
-        audit "GCP"
-        found_provider=true
-    fi
+echo "Determining cloud provider..."
+if type aws >/dev/null 2>&1; then
+    audit "AWS" "$cs_string" "$container"
+    found_provider=true
+fi
+if type az >/dev/null 2>&1; then
+    audit "Azure" "$cs_string" "$container"
+    found_provider=true
+fi
+if type gcloud >/dev/null 2>&1; then
+    audit "GCP" "$cs_string" "$container"
+    found_provider=true
 fi
 
 if [ "$found_provider" = false ]; then
