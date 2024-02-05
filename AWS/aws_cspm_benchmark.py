@@ -6,6 +6,8 @@ all billable resources attached to an AWS account.
 """
 import argparse
 import csv
+import glob
+from datetime import datetime
 import boto3
 from tabulate import tabulate
 
@@ -36,7 +38,19 @@ def parse_args():
         "-r", "--role_name",
         default="OrganizationAccountAccessRole",
         help="Specify a custom role name to assume into.")
+    parser.add_argument(
+        "-b", "--bucket_name",
+        default=None,
+        help="S3 bucket to upload results to")
     return parser.parse_args()
+
+
+def upload(bucket):
+    s3 = boto3.resource('s3')
+    folder = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+
+    for file in glob.glob("*.csv"):
+        s3.Bucket(bucket).upload_file(file, folder + "/file")
 
 
 class AWSOrgAccess:
@@ -155,7 +169,7 @@ class AWSHandle:
         next_token = response['NextToken'] if 'NextToken' in response else None
 
         while next_token:
-            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
+            response = client.describe_instances(MaxItems=1000, NextToken=next_token)
             users += response['Users']
             next_token = response['NextToken'] if 'NextToken' in response else None
 
@@ -170,8 +184,8 @@ class AWSHandle:
         next_token = response['NextToken'] if 'NextToken' in response else None
 
         while next_token:
-            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
-            roles += response['Users']
+            response = client.describe_instances(MaxItems=1000, NextToken=next_token)
+            roles += response['Roles']
             next_token = response['NextToken'] if 'NextToken' in response else None
 
         return len(roles)
@@ -219,8 +233,6 @@ with open('aws-benchmark.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer.writeheader()
     csv_writer.writerows(data)
 
-print("\nCSV file stored in: ./aws-benchmark.csv\n\n")
-
 headers = ['account_id', 'users', 'roles']
 with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer = csv.writer(csv_file)
@@ -229,6 +241,11 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
         ucount, rcount = iam_counts[acc]
         csv_writer.writerow([acc, ucount, rcount])
 
+print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
+
+if args.bucket_name:
+    upload(args.bucket_name)
+    print("\nCSV files uploaded to:" + args.bucket_name + "\n\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
