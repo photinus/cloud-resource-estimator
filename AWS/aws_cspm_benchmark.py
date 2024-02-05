@@ -9,6 +9,8 @@ import csv
 import boto3
 from tabulate import tabulate
 
+from Utils import Upload
+
 
 data = []
 headers = {
@@ -219,8 +221,6 @@ with open('aws-benchmark.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer.writeheader()
     csv_writer.writerows(data)
 
-print("\nCSV file stored in: ./aws-benchmark.csv\n\n")
-
 headers = ['account_id', 'users', 'roles']
 with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
     csv_writer = csv.writer(csv_file)
@@ -228,6 +228,8 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
     for acc in iam_counts:  # pylint: disable=consider-using-dict-items
         ucount, rcount = iam_counts[acc]
         csv_writer.writerow([acc, ucount, rcount])
+
+print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
 
 #     .wwwwwwww.
