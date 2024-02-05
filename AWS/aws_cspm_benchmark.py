@@ -180,12 +180,12 @@ class AWSHandle:
         client = self.iam
 
         response = client.list_roles(MaxItems=1000)
-        roles = response['Users']
+        roles = response['Roles']
         next_token = response['NextToken'] if 'NextToken' in response else None
 
         while next_token:
             response = client.describe_instances(MaxItems=1000, NextToken=next_token)
-            roles += response['Users']
+            roles += response['Roles']
             next_token = response['NextToken'] if 'NextToken' in response else None
 
         return len(roles)
