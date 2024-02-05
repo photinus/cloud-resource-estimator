@@ -7,9 +7,11 @@ all billable resources attached to an AWS account.
 import argparse
 import csv
 import boto3
+import sys
 from tabulate import tabulate
 
-from ..Utils.upload import Upload
+sys.path.append("..")
+from Utils.upload import Upload
 
 
 data = []
