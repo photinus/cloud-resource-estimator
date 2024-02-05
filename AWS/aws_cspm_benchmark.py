@@ -7,11 +7,10 @@ all billable resources attached to an AWS account.
 import argparse
 import csv
 import boto3
+import glob
 import sys
+from datetime import datetime
 from tabulate import tabulate
-
-sys.path.append("..")
-from Utils.upload import Upload
 
 
 data = []
@@ -45,6 +44,13 @@ def parse_args():
         default=None,
         help="S3 bucket to upload results to")
     return parser.parse_args()
+
+def upload(bucket):
+    s3 = boto3.resource('s3')
+    folder = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+
+    for file in glob.glob("*.csv"):
+        s3.Bucket(bucket).upload_file(file, folder + "/file")
 
 
 class AWSOrgAccess:
@@ -238,8 +244,7 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
 if args.bucket_name:
-    upload_client = Upload(args.bucket_name)
-    upload_client.upload()
+    upload(args.bucket_name)
     print("\nCSV files uploaded to:" + args.bucket_name + "\n\n")
 
 #     .wwwwwwww.
