@@ -55,8 +55,8 @@ def upload(connection_string, container):
     prefix = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
     for file in glob.glob("*.csv"):
-        with open(file, "rb") as data:
-            container_client.upload_blob(name=prefix + file, data=data)
+        with open(file, "rb") as file_data:
+            container_client.upload_blob(name=prefix + file, data=file_data)
 
 
 class AWSOrgAccess:

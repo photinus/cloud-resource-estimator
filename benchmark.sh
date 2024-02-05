@@ -100,7 +100,7 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    call_benchmark_script "$CLOUD" "${file}" -b "$BLOB" -c "$CONTAINER"
+    call_benchmark_script "$CLOUD" "${file}" -b "$BLOB_CS" -c "$CONTAINER"
 }
 
 check_python3
@@ -115,15 +115,15 @@ found_provider=false
 
 # If arguments are provided, audit the specified providers
 
-result=$(is_valid_cloud $1)
+result=$(is_valid_cloud "$1")
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then
-    if [ $# > 1 ]; then
-        cs_string = $2
-        container = $3
+    if [ $# -gt 1 ]; then
+        cs_string=$2
+        container=$3
     else
-        cs_string = ""
-        container = ""
+        cs_string=""
+        container=""
     fi
     audit "$result" "$cs_string" "$container"
     found_provider=true
