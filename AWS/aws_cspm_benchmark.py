@@ -9,7 +9,7 @@ import csv
 import boto3
 from tabulate import tabulate
 
-from Utils.upload import Upload
+from ..Utils.upload import Upload
 
 
 data = []
