@@ -6,9 +6,9 @@ all billable resources attached to an AWS account.
 """
 import argparse
 import csv
-import boto3
 import glob
 from datetime import datetime
+import boto3
 from tabulate import tabulate
 
 
