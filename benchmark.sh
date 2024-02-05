@@ -128,7 +128,7 @@ if [ $? -eq 0 ]; then
     audit "$result" "$cs_string" "$container"
     found_provider=true
 else
-    echo "Invalid cloud provider specified: $arg"
+    echo "Invalid cloud provider specified: $1"
     # Exit only if found_provider is false. This means that if the user
     # specifies a valid cloud provider, but also an invalid one, we will
     # still run the audit for the valid provider.
