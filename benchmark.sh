@@ -118,7 +118,7 @@ found_provider=false
 result=$(is_valid_cloud $1)
 # shellcheck disable=SC2181
 if [ $? -eq 0 ]; then
-    if [$# > 1]; then
+    if [ $# > 1 ]; then
         cs_string = $2
         container = $3
     else

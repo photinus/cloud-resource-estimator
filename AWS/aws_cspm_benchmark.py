@@ -8,7 +8,7 @@ import argparse
 import csv
 import glob
 from datetime import datetime
-from azure.storage.blob import ContainerClient 
+from azure.storage.blob import ContainerClient
 import boto3
 from tabulate import tabulate
 
