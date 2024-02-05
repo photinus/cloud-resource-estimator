@@ -135,7 +135,7 @@ def get_gcp_service_account_count(project):  # pylint: disable=redefined-outer-n
 gcp = GCP()
 
 logging_rows = []
-service_account_rows = []
+service_account_rows = {}
 for project in gcp.projects():  # pylint: disable=redefined-outer-name
     if project.state == Project.State.DELETE_REQUESTED:
         log.debug("Skipping GCP project %s (project pending deletion)", project.display_name)
@@ -176,9 +176,10 @@ log.info("CSV Logging summary has been exported to ./gcp-logging-config.csv file
 
 headers = ['project_id', 'type', 'value']
 with open('gcp-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
-    csv_writer = csv.DictWriter(csv_file, fieldnames=headers)
-    csv_writer.writeheader()
-    for pid in service_account_rows:
-        csv_writer.writerow([pid, 'service_account_total', service_account_rows[pid]])
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(headers)
+    for pro_id in service_account_rows:  # pylint: disable=consider-using-dict-items
+        sa_count = service_account_rows[pro_id]
+        csv_writer.writerow([pro_id, 'service_account_total', sa_count])
 
 log.info("CSV Logging summary has been exported to ./gcp-iam-details.csv file")

@@ -250,8 +250,8 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
 if args.blob_string:
-    upload(args.blob_string)
-    print("\nCSV files uploaded to:" + args.blob_string + "\n\n")
+    upload(args.blob_string, args.container)
+    print("\nCSV files uploaded to:" + args.container + "\n\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
