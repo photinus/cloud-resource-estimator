@@ -80,11 +80,16 @@ call_benchmark_script() {
         ;;
     esac
 
+    [[ -n $AWS_ASSUME_ROLE_NAME ]] && args+=("-r" "$AWS_ASSUME_ROLE_NAME")
+
     python3 "${file}" "${args[@]}"
 }
 
 audit() {
     CLOUD="$1"
+    BLOB_CS="$2"
+    CONTAINER="$3"
+
     echo "Working in cloud: ${CLOUD}"
     cloud=$(echo "$CLOUD" | tr '[:upper:]' '[:lower:]')
 
@@ -95,7 +100,7 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    call_benchmark_script "$CLOUD" "${file}"
+    call_benchmark_script "$CLOUD" "${file}" -b "$BLOB" -c "$CONTAINER"
 }
 
 check_python3
@@ -109,23 +114,29 @@ source ./bin/activate
 found_provider=false
 
 # If arguments are provided, audit the specified providers
-for arg in "$@"; do
-    result=$(is_valid_cloud "$arg")
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ]; then
-        audit "$result"
-        found_provider=true
+
+result=$(is_valid_cloud $1)
+# shellcheck disable=SC2181
+if [ $? -eq 0 ]; then
+    if [$# > 1]; then
+        cs_string = $2
+        container = $3
     else
-        echo "Invalid cloud provider specified: $arg"
-        # Exit only if found_provider is false. This means that if the user
-        # specifies a valid cloud provider, but also an invalid one, we will
-        # still run the audit for the valid provider.
-        if [ "$found_provider" = false ]; then
-            usage
-            popd >/dev/null && exit 1
-        fi
+        cs_string = ""
+        container = ""
     fi
-done
+    audit "$result" "$cs_string" "$container"
+    found_provider=true
+else
+    echo "Invalid cloud provider specified: $arg"
+    # Exit only if found_provider is false. This means that if the user
+    # specifies a valid cloud provider, but also an invalid one, we will
+    # still run the audit for the valid provider.
+    if [ "$found_provider" = false ]; then
+        usage
+        popd >/dev/null && exit 1
+    fi
+fi
 
 # If no arguments provided, auto-detect the available cloud providers
 if [ $# -eq 0 ]; then

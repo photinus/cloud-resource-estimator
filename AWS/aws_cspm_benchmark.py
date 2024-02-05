@@ -6,10 +6,10 @@ all billable resources attached to an AWS account.
 """
 import argparse
 import csv
-import boto3
 import glob
-import sys
 from datetime import datetime
+from azure.storage.blob import ContainerClient 
+import boto3
 from tabulate import tabulate
 
 
@@ -40,17 +40,23 @@ def parse_args():
         default="OrganizationAccountAccessRole",
         help="Specify a custom role name to assume into.")
     parser.add_argument(
-        "-b", "--bucket_name",
+        "-b", "--blob_string",
         default=None,
-        help="S3 bucket to upload results to")
+        help="Connection string to upload files to Azure Blob")
+    parser.add_argument(
+        "-c", "--container",
+        default=None,
+        help="Container to upload to")
     return parser.parse_args()
 
-def upload(bucket):
-    s3 = boto3.resource('s3')
-    folder = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+
+def upload(connection_string, container):
+    container_client = ContainerClient.from_connection_string(conn_str=connection_string, container_name=container)
+    prefix = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
     for file in glob.glob("*.csv"):
-        s3.Bucket(bucket).upload_file(file, folder + "/file")
+        with open(file, "rb") as data:
+            container_client.upload_blob(name=prefix + file, data=data)
 
 
 class AWSOrgAccess:
@@ -164,12 +170,12 @@ class AWSHandle:
 
         client = self.iam
 
-        response = client.list_users(MaxResults=1000)
+        response = client.list_users(MaxItems=1000)
         users = response['Users']
         next_token = response['NextToken'] if 'NextToken' in response else None
 
         while next_token:
-            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
+            response = client.describe_instances(MaxItems=1000, NextToken=next_token)
             users += response['Users']
             next_token = response['NextToken'] if 'NextToken' in response else None
 
@@ -179,13 +185,13 @@ class AWSHandle:
 
         client = self.iam
 
-        response = client.list_roles(MaxResults=1000)
-        roles = response['Users']
+        response = client.list_roles(MaxItems=1000)
+        roles = response['Roles']
         next_token = response['NextToken'] if 'NextToken' in response else None
 
         while next_token:
-            response = client.describe_instances(MaxResults=1000, NextToken=next_token)
-            roles += response['Users']
+            response = client.describe_instances(MaxItems=1000, NextToken=next_token)
+            roles += response['Roles']
             next_token = response['NextToken'] if 'NextToken' in response else None
 
         return len(roles)
@@ -243,9 +249,9 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 
 print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
-if args.bucket_name:
-    upload(args.bucket_name)
-    print("\nCSV files uploaded to:" + args.bucket_name + "\n\n")
+if args.blob_string:
+    upload(args.blob_string)
+    print("\nCSV files uploaded to:" + args.blob_string + "\n\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
