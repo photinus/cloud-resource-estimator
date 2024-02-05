@@ -199,6 +199,9 @@ class AWSHandle:
 
 args = parse_args()
 
+if args.blob_string:
+    print(f"Uploading output files to Azure container {args.container}")
+
 for aws in AWSOrgAccess().accounts():
     for region in aws.regions:
         RegionName = region["RegionName"]
