@@ -8,6 +8,7 @@ import argparse
 import csv
 import glob
 from datetime import datetime
+from azure.storage.blob import ContainerClient
 import boto3
 from tabulate import tabulate
 
@@ -39,18 +40,23 @@ def parse_args():
         default="OrganizationAccountAccessRole",
         help="Specify a custom role name to assume into.")
     parser.add_argument(
-        "-b", "--bucket_name",
+        "-b", "--blob_string",
         default=None,
-        help="S3 bucket to upload results to")
+        help="Connection string to upload files to Azure Blob")
+    parser.add_argument(
+        "-c", "--container",
+        default=None,
+        help="Container to upload to")
     return parser.parse_args()
 
 
-def upload(bucket):
-    s3 = boto3.resource('s3')
-    folder = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+def upload(connection_string, container):
+    container_client = ContainerClient.from_connection_string(conn_str=connection_string, container_name=container)
+    prefix = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
     for file in glob.glob("*.csv"):
-        s3.Bucket(bucket).upload_file(file, folder + "/file")
+        with open(file, "rb") as file_data:
+            container_client.upload_blob(name=prefix + file, data=file_data)
 
 
 class AWSOrgAccess:
@@ -243,9 +249,9 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 
 print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
 
-if args.bucket_name:
-    upload(args.bucket_name)
-    print("\nCSV files uploaded to:" + args.bucket_name + "\n\n")
+if args.blob_string:
+    upload(args.blob_string, args.container)
+    print("\nCSV files uploaded to:" + args.container + "\n\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
