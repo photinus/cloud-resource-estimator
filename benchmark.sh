@@ -102,7 +102,7 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    if [ $BLOB_CS -ne "_" ]; then
+    if [ "$BLOB_CS" != "_" ]; then
         call_benchmark_script "$CLOUD" "${file}" -b "$BLOB_CS" -c "$CONTAINER"
     else
         call_benchmark_script "$CLOUD" "${file}"
