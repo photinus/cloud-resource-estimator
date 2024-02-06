@@ -61,30 +61,14 @@ is_valid_cloud() {
 call_benchmark_script() {
     local cloud="$1"
     local file="$2"
-    local 
-    local 
-    local args=()
+    local blob_cs=$3
+    local container=$4
 
-    case "$cloud" in
-    AWS)
-        [[ -n $AWS_ASSUME_ROLE_NAME ]] && args+=("-r" "$AWS_ASSUME_ROLE_NAME")
-        # Below is how we would pass in additional arguments if needed
-        # [[ -n $AWS_EXAMPLE ]] && args+=("-t" "$AWS_EXAMPLE")
-        ;;
-    Azure)
-        ;;
-    GCP)
-        ;;
-    *)
-        echo "Invalid cloud provider specified: $cloud"
-        usage
-        exit 1
-        ;;
-    esac
-
-    [[ -n $AWS_ASSUME_ROLE_NAME ]] && args+=("-r" "$AWS_ASSUME_ROLE_NAME")
-
-    python3 "${file}" "${args[@]}"
+    if [ "$blob_cs" != "_" ]; then
+        python3 "${file}" -b "$blob_cs" -c "$container"
+    else
+        python3 "${file}"
+    fi
 }
 
 audit() {
@@ -102,11 +86,7 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    if [ "$BLOB_CS" != "_" ]; then
-        call_benchmark_script "$CLOUD" "${file}" -b "$BLOB_CS" -c "$CONTAINER"
-    else
-        call_benchmark_script "$CLOUD" "${file}"
-    fi
+    call_benchmark_script "$CLOUD" "${file}" "$BLOB_CS" "$CONTAINER"
 }
 
 check_python3
