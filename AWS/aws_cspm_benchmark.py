@@ -249,7 +249,7 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 print("\nCSV files stored in: ./aws-benchmark.csv\n")
 
 if args.blob_string:
-    container = args.blob_string.split("/")[3].split("?")[0]}
+    container = args.blob_string.split("/")[3].split("?")[0]
     print(f"Uploading output files to provided Azure container: {container}\n")
     upload(args.blob_string)
     print(f"CSV files uploaded to Azure container: {container}\n")
