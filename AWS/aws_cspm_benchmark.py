@@ -53,7 +53,7 @@ def upload(connection_string):
 
     for file in glob.glob("*.csv"):
         with open(file, "rb") as file_data:
-            blob_url = cs_split[0] + "/" file + "?" + cs_split[1]
+            blob_url = cs_split[0] + "/" + file + "?" + cs_split[1]
             blob_client = BlobClient.from_blob_url(blob_url=blob_url)
             container_client.upload_blob(name=file, data=data, overwrite=True)
 
