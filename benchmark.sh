@@ -62,10 +62,9 @@ call_benchmark_script() {
     local cloud="$1"
     local file="$2"
     local blob_cs=$3
-    local container=$4
 
     if [ "$blob_cs" != "_" ]; then
-        python3 "${file}" -b "$blob_cs" -c "$container"
+        python3 "${file}" -b "$blob_cs"
     else
         python3 "${file}"
     fi
@@ -74,7 +73,6 @@ call_benchmark_script() {
 audit() {
     CLOUD="$1"
     BLOB_CS="$2"
-    CONTAINER="$3"
 
     echo "Working in cloud: ${CLOUD}"
     cloud=$(echo "$CLOUD" | tr '[:upper:]' '[:lower:]')
@@ -86,7 +84,7 @@ audit() {
     file="${cloud}_cspm_benchmark.py"
     curl -s -o "${file}" "${base_url}/${CLOUD}/${file}"
 
-    call_benchmark_script "$CLOUD" "${file}" "$BLOB_CS" "$CONTAINER"
+    call_benchmark_script "$CLOUD" "${file}" "$BLOB_CS"
 }
 
 check_python3
@@ -99,25 +97,23 @@ source ./bin/activate
 # MAIN ROUTINE
 found_provider=false
 
-if [ $# -gt 1 ]; then
+if [ $# -gt 0 ]; then
     cs_string=$1
-    container=$2
 else
     cs_string="_"
-    container="_"
 fi
 
 echo "Determining cloud provider..."
 if type aws >/dev/null 2>&1; then
-    audit "AWS" "$cs_string" "$container"
+    audit "AWS" "$cs_string"
     found_provider=true
 fi
 if type az >/dev/null 2>&1; then
-    audit "Azure" "$cs_string" "$container"
+    audit "Azure" "$cs_string"
     found_provider=true
 fi
 if type gcloud >/dev/null 2>&1; then
-    audit "GCP" "$cs_string" "$container"
+    audit "GCP" "$cs_string"
     found_provider=true
 fi
 

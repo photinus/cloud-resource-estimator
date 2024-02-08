@@ -8,7 +8,7 @@ import argparse
 import csv
 import glob
 from datetime import datetime
-from azure.storage.blob import ContainerClient
+from azure.storage.blob import BlobClient
 import boto3
 from tabulate import tabulate
 
@@ -43,20 +43,19 @@ def parse_args():
         "-b", "--blob_string",
         default=None,
         help="Connection string to upload files to Azure Blob")
-    parser.add_argument(
-        "-c", "--container",
-        default=None,
-        help="Container to upload to")
     return parser.parse_args()
 
 
-def upload(connection_string, container):
-    container_client = ContainerClient.from_connection_string(conn_str=connection_string, container_name=container)
-    prefix = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+def upload(connection_string):
+
+    prefix = datetime.now().strftime("%m_%d_%Y_%H_%M_%S_")
+    cs_split = connection_string.split("?")
 
     for file in glob.glob("*.csv"):
         with open(file, "rb") as file_data:
-            container_client.upload_blob(name=prefix + file, data=file_data)
+            blob_url = cs_split[0] + "/" file + "?" + cs_split[1]
+            blob_client = BlobClient.from_blob_url(blob_url=blob_url)
+            container_client.upload_blob(name=file, data=data, overwrite=True)
 
 
 class AWSOrgAccess:
@@ -199,9 +198,6 @@ class AWSHandle:
 
 args = parse_args()
 
-if args.blob_string:
-    print(f"Uploading output files to Azure container {args.container}")
-
 for aws in AWSOrgAccess().accounts():
     for region in aws.regions:
         RegionName = region["RegionName"]
@@ -250,11 +246,13 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
         ucount, rcount = iam_counts[acc]
         csv_writer.writerow([acc, ucount, rcount])
 
-print("\nCSV files stored in: ./aws-benchmark.csv\n\n")
+print("\nCSV files stored in: ./aws-benchmark.csv\n")
 
 if args.blob_string:
-    upload(args.blob_string, args.container)
-    print("\nCSV files uploaded to:" + args.container + "\n\n")
+    container = args.blob_string.split("/")[3].split("?")[0]}
+    print(f"Uploading output files to provided Azure container: {container}\n")
+    upload(args.blob_string)
+    print(f"CSV files uploaded to Azure container: {container}\n")
 
 #     .wwwwwwww.
 #   .w"  "WW"  "w.
