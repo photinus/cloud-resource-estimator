@@ -261,8 +261,8 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
 print("\nCSV files stored in: ./aws-benchmark.csv\n")
 
 headers = cloudtrails[0].keys()
-with open('cloudtrails.csv', 'w', newline='') as output_file:
-    dict_writer = csv.DictWriter(output_file, headers)
+with open('cloudtrails.csv', 'w', newline='', encoding='utf-8') as csv_file:
+    dict_writer = csv.DictWriter(csv_file, headers)
     dict_writer.writeheader()
     dict_writer.writerows(cloudtrails)
 
