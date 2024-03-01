@@ -14,6 +14,7 @@ from tabulate import tabulate
 
 
 data = []
+cloudtrails = []
 headers = {
     'account_id': 'AWS Account ID',
     "region": "Region",
@@ -53,9 +54,10 @@ def upload(connection_string):
 
     for file in glob.glob("*.csv"):
         with open(file, "rb") as file_data:
-            blob_url = cs_split[0] + "/" + file + "?" + cs_split[1]
+            filename = prefix + file
+            blob_url = cs_split[0] + "/" + filename + "?" + cs_split[1]
             blob_client = BlobClient.from_blob_url(blob_url=blob_url)
-            container_client.upload_blob(name=file, data=data, overwrite=True)
+            blob_client.upload_blob(name=filename, data=file_data, overwrite=True)
 
 
 class AWSOrgAccess:
@@ -195,6 +197,12 @@ class AWSHandle:
 
         return len(roles)
 
+    def cloudtrail_instances(self, aws_region):
+        cl_client = self.aws_session.client('cloudtrail', aws_region)
+        # s3_client = self.aws_session.client('s3', aws_region)
+
+        return cl_client.describe_trails()['trailList']
+
 
 args = parse_args()
 
@@ -222,6 +230,10 @@ for aws in AWSOrgAccess().accounts():
 
         # Add the row to our display table
         data.append(row)
+
+        # Get CloudTrail details
+        cloudtrails += aws.cloudtrail_instances(RegionName)
+
     # Add in our grand totals to the display table
 data.append(totals)
 
@@ -247,6 +259,12 @@ with open('aws-iam-details.csv', 'w', newline='', encoding='utf-8') as csv_file:
         csv_writer.writerow([acc, ucount, rcount])
 
 print("\nCSV files stored in: ./aws-benchmark.csv\n")
+
+headers = cloudtrails[0].keys()
+with open('cloudtrails.csv', 'w', newline='', encoding='utf-8') as csv_file:
+    dict_writer = csv.DictWriter(csv_file, headers)
+    dict_writer.writeheader()
+    dict_writer.writerows(cloudtrails)
 
 if args.blob_string:
     container = args.blob_string.split("/")[3].split("?")[0]
