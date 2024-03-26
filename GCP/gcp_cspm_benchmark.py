@@ -42,8 +42,13 @@ class GCP:
         service = discovery.build('container', 'v1')
         endpoint = service.projects().zones().clusters()  # pylint: disable=no-member
         request = endpoint.list(projectId=project_id, zone='-')
-        response = request.execute()
-        return response.get('clusters', [])
+        try:
+            response = request.execute()
+            return response.get('clusters', [])
+        except:
+            log.debug('Skipping')
+            return []
+        
 
     @cached_property
     def instances_client(self):
