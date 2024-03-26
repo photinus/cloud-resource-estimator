@@ -39,10 +39,10 @@ class GCP:
         return self.instances_client.aggregated_list(request=request)
 
     def clusters(self, project_id):
-        service = discovery.build('container', 'v1')
-        endpoint = service.projects().zones().clusters()  # pylint: disable=no-member
-        request = endpoint.list(projectId=project_id, zone='-')
         try:
+            service = discovery.build('container', 'v1')
+            endpoint = service.projects().zones().clusters()  # pylint: disable=no-member
+            request = endpoint.list(projectId=project_id, zone='-')
             response = request.execute()
             return response.get('clusters', [])
         except:
